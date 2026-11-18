@@ -1,0 +1,11 @@
+{
+  "src/entry-server.tsx": {
+    "file": "entry-server.js",
+    "name": "entry-server",
+    "src": "src/entry-server.tsx",
+    "isEntry": true,
+    "css": [
+      "assets/entry-server-APkW52-d.css"
+    ]
+  }
+}

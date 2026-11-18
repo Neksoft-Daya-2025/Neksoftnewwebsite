@@ -1,0 +1,70 @@
+{
+  "_framework-DUmcCvuS.js": {
+    "file": "assets/framework-DUmcCvuS.js",
+    "name": "framework",
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js"
+    ]
+  },
+  "_motion-ClADab9N.js": {
+    "file": "assets/motion-ClADab9N.js",
+    "name": "motion"
+  },
+  "_rolldown-runtime-WkwZ5CU-.js": {
+    "file": "assets/rolldown-runtime-WkwZ5CU-.js",
+    "name": "rolldown-runtime"
+  },
+  "_x-Pm9FOPHl.js": {
+    "file": "assets/x-Pm9FOPHl.js",
+    "name": "x",
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js",
+      "_framework-DUmcCvuS.js"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index-BqG2Ffs3.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js",
+      "_framework-DUmcCvuS.js"
+    ],
+    "dynamicImports": [
+      "src/admin/AdminApp.tsx",
+      "src/App.tsx"
+    ]
+  },
+  "src/App.tsx": {
+    "file": "assets/App-BgJiXaWb.js",
+    "name": "App",
+    "src": "src/App.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js",
+      "_framework-DUmcCvuS.js",
+      "_x-Pm9FOPHl.js",
+      "index.html",
+      "_motion-ClADab9N.js"
+    ],
+    "css": [
+      "assets/App-CZGH3lrb.css"
+    ]
+  },
+  "src/admin/AdminApp.tsx": {
+    "file": "assets/AdminApp-CmsJAPn-.js",
+    "name": "AdminApp",
+    "src": "src/admin/AdminApp.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js",
+      "_framework-DUmcCvuS.js",
+      "_x-Pm9FOPHl.js",
+      "index.html"
+    ],
+    "css": [
+      "assets/AdminApp-BEhtIBm5.css"
+    ]
+  }
+}

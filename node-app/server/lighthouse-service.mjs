@@ -1,0 +1,18 @@
+import {lighthousePdf} from './lighthouse-pdf.mjs';
+import {fork} from 'node:child_process';
+import {mkdir,readFile,stat} from 'node:fs/promises';
+import path from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {HttpError,jsonBody,rateLimit} from './security.mjs';
+const active=new Set();
+export async function lighthouseService({req,res,user,db,directory,json,seed,origin,method,pathname,audit}){
+ if(!['owner','editor'].includes(user.role))throw new HttpError(403,'Website editor access required.');
+ db.exec("CREATE TABLE IF NOT EXISTS lighthouse_reports(id TEXT PRIMARY KEY,route TEXT,device TEXT,status TEXT,scores TEXT,error TEXT,created_at TEXT)");
+ if(pathname==='/api/admin/lighthouse'&&method==='GET')return json(res,200,{reports:db.prepare('SELECT * FROM lighthouse_reports ORDER BY created_at DESC LIMIT 20').all().map(r=>({...r,scores:JSON.parse(r.scores||'{}')}))});
+ const match=pathname.match(/^\/api\/admin\/lighthouse\/([a-f0-9-]+)\/(html|json|pdf)$/);
+ if(match&&method==='GET'){const row=db.prepare('SELECT * FROM lighthouse_reports WHERE id=?').get(match[1]);if(!row||row.status!=='complete')throw new HttpError(404,'Report not available.');const bytes=match[2]==='pdf'?await lighthousePdf(JSON.parse(await readFile(path.join(directory,'lighthouse',match[1]+'.json'),'utf8'))):await readFile(path.join(directory,'lighthouse',match[1]+'.'+match[2]));res.setHeader('Content-Type',match[2]==='pdf'?'application/pdf':match[2]==='html'?'text/html; charset=utf-8':'application/json');res.setHeader('Content-Disposition',`attachment; filename="neksoft-lighthouse-${row.device}-${row.id}.${match[2]}"`);res.setHeader('Cache-Control','no-store');res.end(bytes);return;}
+ if(pathname==='/api/admin/lighthouse'&&method==='POST'){rateLimit(db,'lighthouse:'+user.id,5,3600000);if(active.size)throw new HttpError(409,'An audit is already running. Please wait.');const body=await jsonBody(req);if(!Object.hasOwn(seed.pages,body.route))throw new HttpError(400,'Choose an existing public page.');const device=body.device==='desktop'?'desktop':'mobile',id=randomUUID(),folder=path.join(directory,'lighthouse');await mkdir(folder,{recursive:true,mode:0o700});db.prepare('INSERT INTO lighthouse_reports VALUES(?,?,?,?,?,?,?)').run(id,body.route,device,'running','{}','',new Date().toISOString());active.add(id);
+ const worker=fork(new URL('./lighthouse-worker.mjs',import.meta.url),[],{stdio:['ignore','ignore','inherit','ipc'],windowsHide:true,env:Object.fromEntries(Object.entries(process.env).filter(([key])=>['PATH','Path','SystemRoot','SYSTEMROOT','TEMP','TMP','HOME','USERPROFILE','LOCALAPPDATA','PROGRAMFILES','PROGRAMFILES(X86)','CHROME_PATH'].includes(key)))});let completed=false;const finish=(status,scores={},error='')=>{if(completed)return;completed=true;clearTimeout(timer);active.delete(id);db.prepare('UPDATE lighthouse_reports SET status=?,scores=?,error=? WHERE id=?').run(status,JSON.stringify(scores),error,id);};const timer=setTimeout(()=>{worker.kill();finish('failed',{},'Audit exceeded 3 minutes. Retry with a running website and Chrome installed.');},180000);worker.on('message',msg=>{if(msg.ok)finish('complete',msg.scores);else finish('failed',{},msg.error||'Audit failed.');});worker.on('error',()=>finish('failed',{},'Could not start audit worker.'));worker.on('exit',()=>{if(!completed)finish('failed',{},'Audit worker stopped before a report was generated.');});worker.send({url:new URL(body.route,origin).href,device,folder,id});audit(user,'lighthouse.started',body.route);return json(res,202,{id});}
+ throw new HttpError(404,'Lighthouse endpoint not found.');
+}
+
