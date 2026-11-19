@@ -197,6 +197,16 @@ export async function createBackend(options = {}) {
         const media = db.prepare('SELECT path,mime FROM media WHERE path=?').get(pathname); if (!media) throw new HttpError(404, 'Image not found.');
         const bytes = await readFile(path.join(directory, 'uploads', path.basename(pathname))); res.setHeader('Content-Type', media.mime); res.setHeader('Cache-Control', 'public,max-age=31536000,immutable'); res.end(method === 'HEAD' ? undefined : bytes); return;
       }
+      // Retired root-only URL patterns discovered in historical Search Console data.
+      if (pathname === '/') {
+        const query = new URL(req.url, origin).searchParams;
+        const retiredListing = query.getAll('l').some(value => /^[a-f0-9]{8,}\/*$/i.test(value));
+        const retiredPost = query.getAll('p').some(value => /^\d+\/*$/.test(value));
+        if (retiredListing || retiredPost) {
+          res.setHeader('X-Robots-Tag', 'noindex');
+          return json(res, 410, { error: 'This legacy URL is no longer available.' });
+        }
+      }
       if (!options.serveFrontend) throw new HttpError(404, 'Not found.');
       if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${Object.keys(pages).map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
       if(pathname==='/robots.txt'){res.setHeader('Content-Type','text/plain; charset=utf-8');res.end(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: ${origin}/sitemap.xml\n`);return;}
