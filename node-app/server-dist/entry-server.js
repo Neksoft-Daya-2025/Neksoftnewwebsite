@@ -15494,7 +15494,6 @@ function SolutionsPage() {
 			title: cmsText(/* @__PURE__ */ jsxs(Fragment, { children: [
 				cmsText("The right systems.", "App:SolutionsPage"),
 				/* @__PURE__ */ jsx("br", {}),
-				/* @__PURE__ */ jsx(ApprovedDigital, {}),
 				/* @__PURE__ */ jsx("span", {
 					className: "blue-text",
 					children: cmsText("Working together.", "App:SolutionsPage")
@@ -15502,6 +15501,7 @@ function SolutionsPage() {
 			] }), "App:SolutionsPage"),
 			description: "From a sensor in the field to an application in your team’s hands. Explore the capabilities that connect your operation."
 		}),
+		/* @__PURE__ */ jsx(ApprovedDigital, {}),
 		/* @__PURE__ */ jsx(SolutionsShowcase, { standalone: true }),
 		/* @__PURE__ */ jsx(ServiceDirectory, {}),
 		/* @__PURE__ */ jsx(SystemExperience, {}),
