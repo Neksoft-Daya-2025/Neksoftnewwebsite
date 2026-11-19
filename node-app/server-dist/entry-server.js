@@ -10617,7 +10617,7 @@ var pageFAQs = {
 	"/contact": [
 		["What should I include in my enquiry?", "Explain the problem, who experiences it, the systems involved, and what a useful outcome would look like. A high-level budget or timing context is helpful if it is available."],
 		["Do I need a complete specification?", "No. An initial conversation can begin with a process, a set of examples, or a product idea. The next step depends on how much is known and what needs to be validated."],
-		["Does this form send my enquiry automatically?", "The form prepares an email in your email application. Review the draft and send it there. If the application does not open, use the direct email link or copy the prepared enquiry."],
+		["Does this form send my enquiry automatically?", "Yes. Submit the form to save your enquiry directly with the NekSoft team. Wait for the on-screen confirmation. You can also use the direct email link."],
 		["Can I contact a regional office directly?", "The published Netherlands, India, and Germany telephone details are shown on this page. Email is also available at info@neksoftconsultancy.com."],
 		["Can we discuss an existing system?", "Yes. Share a high-level description of the workflow, platform, and issue. The team can agree what documentation or access is appropriate for an assessment."]
 	],
@@ -13339,7 +13339,7 @@ function ContactDepth() {
 				}),
 				/* @__PURE__ */ jsxs("p", {
 					className: "enquiry-submission-note",
-					children: [/* @__PURE__ */ jsx(Check, { size: 16 }), cmsText("The form prepares an email draft. Your enquiry reaches the team after you send that email.", "DetailedExperiences:ContactDepth:section enquiry-next-section")]
+					children: [/* @__PURE__ */ jsx(Check, { size: 16 }), cmsText("Submit the form to save your enquiry securely. A confirmation appears after it has been received.", "DetailedExperiences:ContactDepth:section enquiry-next-section")]
 				})
 			]
 		})
@@ -15223,7 +15223,8 @@ function Footer() {
 								to: cmsLink("/projects"),
 								children: cmsText("Projects", "App:Footer:site-footer dark")
 							}),
-							/* @__PURE__ */ jsx(Link, {
+							/* @__PURE__ */ jsx("a", {href:"/insights",children:"Insights"}),
+/* @__PURE__ */ jsx(Link, {
 								to: cmsLink("/approach"),
 								children: cmsText("Our approach", "App:Footer:site-footer dark")
 							}),

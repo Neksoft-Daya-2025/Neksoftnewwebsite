@@ -1,3 +1,4 @@
+import {editorialRoutes,renderEditorial} from './editorial.mjs';
 import {lighthouseService} from './lighthouse-service.mjs';
 import {emailService,notifyEnquiry} from './email-service.mjs';
 import {healthService} from './website-health.mjs';
@@ -208,13 +209,15 @@ export async function createBackend(options = {}) {
         }
       }
       if (!options.serveFrontend) throw new HttpError(404, 'Not found.');
-      if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${Object.keys(pages).map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
+      if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...Object.keys(pages),...editorialRoutes].map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
       if(pathname==='/robots.txt'){res.setHeader('Content-Type','text/plain; charset=utf-8');res.end(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: ${origin}/sitemap.xml\n`);return;}
       if (pathname === '/services' || pathname === '/services/') {
         res.writeHead(301, { Location: '/solutions' });
         res.end();
         return;
       }
+      const editorial=renderEditorial(pathname,origin);
+      if(editorial){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(method==='HEAD'?undefined:editorial);return;}
       const dist = path.join(root, 'dist'), requested = path.resolve(dist, '.' + decodeURIComponent(pathname));
       if (requested !== dist && !requested.startsWith(dist + path.sep)) throw new HttpError(404, 'Not found.');
       if (path.extname(pathname)) { const info = await stat(requested).catch(() => null); if (!info?.isFile()) throw new HttpError(404, 'File not found.'); res.setHeader('Content-Type', mimeTypes[path.extname(requested)] || 'application/octet-stream'); if (pathname.startsWith('/assets/')) res.setHeader('Cache-Control', 'public,max-age=31536000,immutable'); res.end(method === 'HEAD' ? undefined : await readFile(requested)); return; }
