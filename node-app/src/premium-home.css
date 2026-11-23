@@ -132,3 +132,6 @@
 
 /* Keep the homepage heading visible while animation initializes or resets. */
 #home-hero-title > .text-mask > span { transform: none !important; }
+
+/* Show mobile content immediately instead of waiting for the decorative loader. */
+@media(max-width:700px){.brand-loader{display:none}}
