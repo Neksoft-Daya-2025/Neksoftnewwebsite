@@ -211,6 +211,11 @@ export async function createBackend(options = {}) {
       if (!options.serveFrontend) throw new HttpError(404, 'Not found.');
       if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...Object.keys(pages),...editorialRoutes].map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
       if(pathname==='/robots.txt'){res.setHeader('Content-Type','text/plain; charset=utf-8');res.end(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nAllow: /api/public/site$\nSitemap: ${origin}/sitemap.xml\n`);return;}
+      if (pathname === '/services/mobile' || pathname === '/services/mobile/') {
+        res.writeHead(301, { Location: '/mobile-development' });
+        res.end();
+        return;
+      }
       if (pathname === '/services' || pathname === '/services/') {
         res.writeHead(301, { Location: '/solutions' });
         res.end();
