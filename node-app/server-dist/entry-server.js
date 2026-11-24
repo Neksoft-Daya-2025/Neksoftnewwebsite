@@ -13754,7 +13754,7 @@ function ServicePage({ service: s }) {
 	const [selected, setSelected] = useState(0);
 	const tabs = useRef([]);
 	const capability = s.capabilities[selected];
-	const related = serviceNavigation.filter((item) => item.slug !== s.slug).slice(0, 3);
+	const related = s.slug === "website-solutions" ? [{slug:'insights/restaurant-website-redesign-checklist',label:'Website redesign checklist',description:'Plan content, mobile usability and inquiry journeys.'},{slug:'insights/travel-agency-website-inquiries',label:'Website inquiry planning',description:'Define useful inquiry forms and follow-up requirements.'},{slug:'projects',label:'Explore website projects',description:'Review the current NekSoft portfolio.'}] : serviceNavigation.filter((item) => item.slug !== s.slug).slice(0, 3);
 	return /* @__PURE__ */ jsxs(Fragment, { children: [
 		/* @__PURE__ */ jsxs("section", {
 			className: `service-page-hero dark service-hero-${s.kind}`,

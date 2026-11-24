@@ -1,7 +1,19 @@
 {
   "content": {
     "schemaVersion": 1,
-    "text": {},
+    "text": {
+      "t_ah0vgn_vx9gx9": "Connect your operations and grow your digital presence with IoT platforms, AI automation, custom software and business websites. Explore the right solution for your team.",
+      "t_pbzm50_1xx1lfs": "Connect your operations and grow your digital presence with IoT platforms, AI automation, custom software and business websites. Explore the right solution for your team.",
+      "t_ou9gj_1dr7y63": "Website design, development and redesign for businesses in the Netherlands and India. Plan responsive pages, useful content and a clear path from visitor to inquiry.",
+      "t_155qb24_1hit5iq": "Website design, development and redesign for businesses in the Netherlands and India. Plan responsive pages, useful content and a clear path from visitor to inquiry.",
+      "t_3kkp87_1v7pcw9": "Website design, development and redesign for businesses in the Netherlands and India. Plan responsive pages, useful content and a clear path from visitor to inquiry.",
+      "t_19djyn3_1kugrpb": "Start with your audience, the services you need to explain and the action a visitor should take. We plan page structure, responsive design and inquiry forms around those decisions, with an agreed content-editing workflow.",
+      "t_j9zet4_it1l0q": "Start with your audience, the services you need to explain and the action a visitor should take. We plan page structure, responsive design and inquiry forms around those decisions, with an agreed content-editing workflow.",
+      "t_3cl0sr_1l4cswh": "Start with your audience, the services you need to explain and the action a visitor should take. We plan page structure, responsive design and inquiry forms around those decisions, with an agreed content-editing workflow.",
+      "t_ov0ei2_1uqiueg": "Before development, we agree the pages, content ownership, hosting, CMS access and integrations you need. Launch checks cover mobile navigation, accepted form submissions, important existing URLs and consent-based measurement. Scope and handover responsibilities are confirmed in your proposal.",
+      "t_1yi3wgt_66dya5": "Before development, we agree the pages, content ownership, hosting, CMS access and integrations you need. Launch checks cover mobile navigation, accepted form submissions, important existing URLs and consent-based measurement. Scope and handover responsibilities are confirmed in your proposal.",
+      "t_hc3mhk_1ws4r4m": "Before development, we agree the pages, content ownership, hosting, CMS access and integrations you need. Launch checks cover mobile navigation, accepted form submissions, important existing URLs and consent-based measurement. Scope and handover responsibilities are confirmed in your proposal."
+    },
     "images": {},
     "links": {},
     "pages": {
@@ -10,8 +22,8 @@
         "description": "Zoho consultation, implementation, customization and workflow integration from NekSoft, a Zoho Authorized Partner."
       },
       "/website-solutions": {
-        "title": "Website Solutions",
-        "description": "Professional business websites, responsive web design, content architecture and website development from NekSoft."
+        "title": "Website Design & Development",
+        "description": "Website design, development and redesign for businesses in the Netherlands and India. Plan responsive pages, content updates and a clear inquiry journey with NekSoft."
       },
       "/application-solutions": {
         "title": "Application Solutions",
@@ -38,8 +50,8 @@
         "description": "Role requirements, skills mapping and recruitment workflow support from NekSoft Consultancy Services."
       },
       "/": {
-        "title": "Connected Systems. Intelligent Operations.",
-        "description": "IoT platforms, AI-powered applications and automation systems. NekSoft connects the physical world with intelligent software."
+        "title": "IoT, AI Automation & Software Development",
+        "description": "NekSoft connects IoT, AI automation, custom software and business websites. Explore our solutions and products, then discuss your project with our team."
       },
       "/solutions": {
         "title": "IoT, AI & Software Solutions",
@@ -138,7 +150,7 @@
         "tone": "#e6eef7",
         "initials": "JT",
         "featured": false,
-        "visible": true,
+        "visible": false,
         "desktopImage": "/images/projects/joy-travel-desktop.jpg",
         "mobileImage": "/images/projects/joy-travel-mobile.jpg",
         "mobileWidth": 390,

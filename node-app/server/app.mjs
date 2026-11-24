@@ -221,6 +221,10 @@ export async function createBackend(options = {}) {
         res.end();
         return;
       }
+      if (pathname.replace(/\/+$/, '') === '/case-studies/joy-travel-tours') {
+        res.setHeader('X-Robots-Tag', 'noindex');
+        return json(res, 410, { error: 'This project overview is no longer available.' });
+      }
       const editorial=renderEditorial(pathname,origin);
       if(editorial){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(method==='HEAD'?undefined:editorial);return;}
       const dist = path.join(root, 'dist'), requested = path.resolve(dist, '.' + decodeURIComponent(pathname));
