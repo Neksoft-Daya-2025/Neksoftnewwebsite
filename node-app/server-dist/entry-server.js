@@ -12492,6 +12492,7 @@ function SiteHeader() {
 						})]
 					}), cmsText(navigation.map(([name, to]) => /* @__PURE__ */ jsx(Link, {
 						to: cmsLink(to),
+						reloadDocument: to === "/insights",
 						className: navActive(to) ? "active" : "",
 						"aria-current": navActive(to) ? "page" : void 0,
 						children: cmsText(name, "SiteHeader:SiteHeader:header")
@@ -12576,6 +12577,7 @@ function SiteHeader() {
 				}),
 				cmsText(navigation.map(([name, to], i) => /* @__PURE__ */ jsxs(Link, {
 					to: cmsLink(to),
+					reloadDocument: to === "/insights",
 					onClick: closeAll,
 					className: navActive(to) ? "active" : "",
 					"aria-current": navActive(to) ? "page" : void 0,

@@ -408,7 +408,14 @@
       "contactEmail": "info@neksoftconsultancy.com",
       "phone": "+31 6 48217892",
       "currency": "EUR"
-    }
+    },
+    "menus": [
+      {
+        "label": "Blogs",
+        "href": "/insights",
+        "visible": true
+      }
+    ]
   },
   "manifest": {
     "text": [
