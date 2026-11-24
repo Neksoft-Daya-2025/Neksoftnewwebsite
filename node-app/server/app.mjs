@@ -216,6 +216,11 @@ export async function createBackend(options = {}) {
         res.end();
         return;
       }
+      if (pathname === '/index.html') {
+        res.writeHead(301, { Location: '/' + new URL(req.url, origin).search });
+        res.end();
+        return;
+      }
       if (pathname === '/services' || pathname === '/services/') {
         res.writeHead(301, { Location: '/solutions' });
         res.end();
