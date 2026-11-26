@@ -252,6 +252,7 @@ export async function createBackend(options = {}) {
         res.setHeader('X-Robots-Tag','noindex,nofollow');res.setHeader('Content-Type','text/html; charset=utf-8');
         res.end(method==='HEAD'?undefined:renderEditorial(article.path,origin,{header:renderer.renderHeader(article.path,content),content,articles:[article],preview:true}));return;
       }
+      if(blogs.isDeletedPath(pathname)){res.setHeader('X-Robots-Tag','noindex');return json(res,410,{error:'This blog has been removed.'});}
       let editorial = null;
       if (pathname==='/blogs'||blogs.published().some(a=>a.path===pathname)) {
         renderer ||= await import('../server-dist/entry-server.js');
