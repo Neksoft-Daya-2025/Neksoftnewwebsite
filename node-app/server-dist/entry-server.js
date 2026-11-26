@@ -16003,4 +16003,9 @@ function getCmsSeed() {
 		manifest: getContentManifest()
 	};
 }
-export { getCmsSeed, render, serviceMetadata };
+function renderHeader(path,content){
+ const previous=getSiteContent();setSiteContent(content);setContentCollection(path,false);
+ try{return renderToString(jsx(StaticRouter,{location:path,children:jsx(SiteHeader,{})}));}
+ finally{setSiteContent(previous);}
+}
+export { getCmsSeed, render, renderHeader, serviceMetadata };

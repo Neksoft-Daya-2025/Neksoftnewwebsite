@@ -241,7 +241,12 @@ export async function createBackend(options = {}) {
         res.end();
         return;
       }
-      const editorial=renderEditorial(pathname,origin);
+      let editorial = null;
+      if (editorialRoutes.includes(pathname)) {
+        renderer ||= await import('../server-dist/entry-server.js');
+        const content = JSON.parse(getContent().published);
+        editorial = renderEditorial(pathname, origin, { header: renderer.renderHeader(pathname, content), content });
+      }
       if(editorial){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(method==='HEAD'?undefined:editorial);return;}
       const dist = path.join(root, 'dist'), requested = path.resolve(dist, '.' + decodeURIComponent(pathname));
       if (requested !== dist && !requested.startsWith(dist + path.sep)) throw new HttpError(404, 'Not found.');
