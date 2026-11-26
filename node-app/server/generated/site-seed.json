@@ -412,7 +412,7 @@
     "menus": [
       {
         "label": "Blogs",
-        "href": "/insights",
+        "href": "/blogs",
         "visible": true
       }
     ]

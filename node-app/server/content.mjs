@@ -36,7 +36,7 @@ export function validateContent(input, seed, manifest) {
   const defaults=[{"label":"Home","href":"/","visible":true},{"label":"IoT Solutions","href":"/iot-solutions","visible":true},{"label":"Zoho Services","href":"/zoho-consultation","visible":true},{"label":"Our Products","href":"/#products","visible":true},{"label":"About Us","href":"/about","visible":true},{"label":"Contact","href":"/contact","visible":true}];
   const menus=input.menus??defaults;
   if(!Array.isArray(menus)||menus.length>8)throw new HttpError(400,'Use up to eight main menu links.');
-  output.menus=menus.map(item=>{const href=text(item.href,'menu destination',300,true);if(href!=='/insights'&&!Object.hasOwn(seed.pages,href.split(/[?#]/)[0]))throw new HttpError(400,'Choose an existing page for each menu link.');return {label:text(item.label,'menu label',35,true),href,visible:item.visible!==false};});
+  output.menus=menus.map(item=>{const href=text(item.href,'menu destination',300,true);if(href!=='/blogs'&&!Object.hasOwn(seed.pages,href.split(/[?#]/)[0]))throw new HttpError(400,'Choose an existing page for each menu link.');return {label:text(item.label,'menu label',35,true),href,visible:item.visible!==false};});
   const sectionIds=['hero','trust','fisheries360','metrics','manifesto','solutions','system','industries','projects','approach','people','details','contact'];
   const layout=input.homeLayout??sectionIds.map(id=>({id,visible:true}));
   if(!Array.isArray(layout)||layout.length!==sectionIds.length||new Set(layout.map(s=>s.id)).size!==sectionIds.length||layout.some(s=>!sectionIds.includes(s.id)))throw new HttpError(400,'Invalid homepage layout.');

@@ -230,6 +230,17 @@ export async function createBackend(options = {}) {
         res.setHeader('X-Robots-Tag', 'noindex');
         return json(res, 410, { error: 'This project overview is no longer available.' });
       }
+      if (pathname === '/insights' || pathname.startsWith('/insights/')) {
+        const destination = '/blogs' + pathname.slice('/insights'.length);
+        res.writeHead(301, { Location: destination + new URL(req.url, origin).search });
+        res.end();
+        return;
+      }
+      if (pathname === '/blogs/' || pathname.startsWith('/blogs/') && pathname.endsWith('/')) {
+        res.writeHead(301, { Location: pathname.replace(/\/+$/, '') + new URL(req.url, origin).search });
+        res.end();
+        return;
+      }
       const editorial=renderEditorial(pathname,origin);
       if(editorial){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(method==='HEAD'?undefined:editorial);return;}
       const dist = path.join(root, 'dist'), requested = path.resolve(dist, '.' + decodeURIComponent(pathname));
