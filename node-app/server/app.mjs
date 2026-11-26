@@ -1,3 +1,4 @@
+import {createBlogService} from './blog-service.mjs';
 import {editorialRoutes,renderEditorial} from './editorial.mjs';
 import {lighthouseService} from './lighthouse-service.mjs';
 import {emailService,notifyEnquiry} from './email-service.mjs';
@@ -35,6 +36,7 @@ export async function createBackend(options = {}) {
   let renderer;
   const getContent = () => db.prepare('SELECT * FROM site_content WHERE id=1').get();
   const audit = (user, action, entity, detail = '') => db.prepare('INSERT INTO audit VALUES(?,?,?,?,?,?)').run(randomUUID(), user?.id || null, action, entity, detail.slice(0, 400), now());
+  const blogs=createBlogService(db,audit);
   const requireRole = (user, roles) => { if (!user) throw new HttpError(401, 'Sign in to continue.'); if (!roles.includes(user.role)) throw new HttpError(403, 'Your role does not have access to this action.'); };
   const countUsers = () => db.prepare('SELECT count(*) AS count FROM users').get().count;
   const sessionFor = req => {
@@ -107,6 +109,7 @@ export async function createBackend(options = {}) {
           void notifyEnquiry({db,directory,lead}).catch(()=>{});
           return json(res, 201, { id: lead.id, message: 'Your enquiry has been received. Our team will review your project.' });
         }
+        if(pathname==='/api/admin/blogs'||pathname.startsWith('/api/admin/blogs/'))return await blogs.handle({req,res,user,requireRole,json,pathname,method});
         if (pathname === '/api/admin/dashboard' && method === 'GET') {
           const pipeline = db.prepare('SELECT stage,count(*) AS count FROM leads WHERE archived=0 GROUP BY stage').all();
           const today = new Intl.DateTimeFormat('en-CA', { timeZone: process.env.TEAM_TIMEZONE || 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -178,7 +181,7 @@ export async function createBackend(options = {}) {
         }
         if (pathname.startsWith('/api/admin/media/') && method==='DELETE') {
           requireRole(user,contentRoles);const id=pathname.split('/')[4];const image=db.prepare('SELECT * FROM media WHERE id=?').get(id);if(!image)throw new HttpError(404,'Image not found.');
-          const usage=assetReferences(image.path,getContent(),manifest);if(usage.length)throw new HttpError(409,'This image is used in draft or published content. Replace its references and publish before deleting.');
+          const usage=[...assetReferences(image.path,getContent(),manifest),...blogs.imageUsage(image.path)];if(usage.length)throw new HttpError(409,'This image is used in draft or published content. Replace its references and publish before deleting.');
           db.prepare('DELETE FROM media WHERE id=?').run(id);audit(user,'media.deleted',id,image.name);return json(res,200,{ok:true});
         }
         if (pathname.startsWith('/api/admin/users')) {
@@ -189,7 +192,7 @@ export async function createBackend(options = {}) {
           if (id && method === 'PATCH') { const body = await jsonBody(req), account = db.prepare('SELECT * FROM users WHERE id=?').get(id); if (!account) throw new HttpError(404, 'Account not found.'); const role = choice(body.role ?? account.role, ['owner', 'editor', 'sales'], 'role'), active = body.active === undefined ? account.active : Number(Boolean(body.active)); if (id === user.id && (role !== 'owner' || !active)) throw new HttpError(400, 'You cannot remove your own owner access.');if(id===user.id&&body.password)throw new HttpError(400,'Use My account to change your own password.');const address=email(body.email??account.email);if(db.prepare('SELECT id FROM users WHERE email=? AND id<>?').get(address,id))throw new HttpError(409,'A team account with this email already exists.');const password=body.password?await passwordHash(body.password):account.password_hash; db.prepare('UPDATE users SET name=?,email=?,password_hash=?,role=?,active=? WHERE id=?').run(text(body.name ?? account.name, 'name', 120, true),address,password, role, active, id); db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); audit(user, 'user.access_updated', id); return json(res, 200, { ok: true }); }
         }
         if (pathname === '/api/admin/audit' && method === 'GET') { requireRole(user, ['owner']); return json(res, 200, { events: db.prepare('SELECT a.*,u.name AS author FROM audit a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.created_at DESC LIMIT 300').all() }); }
-        if (pathname === '/api/admin/export' && method === 'GET') { requireRole(user, ['owner']); audit(user, 'workspace.exported', 'workspace'); res.setHeader('Content-Disposition', 'attachment; filename="neksoft-workspace-export.json"'); return json(res, 200, { schemaVersion: 1, exportedAt: now(), content: getContent(), leads: db.prepare('SELECT * FROM leads').all(), notes: db.prepare('SELECT * FROM notes').all(), tasks: db.prepare('SELECT * FROM tasks').all(), media: db.prepare('SELECT id,path,name,mime,size,width,height,created_at FROM media').all(), users: db.prepare('SELECT id,name,email,role,active FROM users').all() }); }
+        if (pathname === '/api/admin/export' && method === 'GET') { requireRole(user, ['owner']); audit(user, 'workspace.exported', 'workspace'); res.setHeader('Content-Disposition', 'attachment; filename="neksoft-workspace-export.json"'); return json(res, 200, { schemaVersion: 1, exportedAt: now(), content: getContent(), blogs:db.prepare('SELECT * FROM blog_posts').all(), leads: db.prepare('SELECT * FROM leads').all(), notes: db.prepare('SELECT * FROM notes').all(), tasks: db.prepare('SELECT * FROM tasks').all(), media: db.prepare('SELECT id,path,name,mime,size,width,height,created_at FROM media').all(), users: db.prepare('SELECT id,name,email,role,active FROM users').all() }); }
         throw new HttpError(404, 'API endpoint not found.');
       }
       if (!['GET', 'HEAD'].includes(method)) throw new HttpError(405, 'Method not allowed.');
@@ -209,7 +212,7 @@ export async function createBackend(options = {}) {
         }
       }
       if (!options.serveFrontend) throw new HttpError(404, 'Not found.');
-      if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...Object.keys(pages),...editorialRoutes].map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
+      if(pathname==='/sitemap.xml'){const pages=JSON.parse(getContent().published).pages;res.setHeader('Content-Type','application/xml; charset=utf-8');res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...Object.keys(pages),'/blogs',...blogs.published().map(a=>a.path)].map(route=>`<url><loc>${escape(origin+route)}</loc></url>`).join('')}</urlset>`);return;}
       if(pathname==='/robots.txt'){res.setHeader('Content-Type','text/plain; charset=utf-8');res.end(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nAllow: /api/public/site$\nSitemap: ${origin}/sitemap.xml\n`);return;}
       if (pathname === '/services/mobile' || pathname === '/services/mobile/') {
         res.writeHead(301, { Location: '/mobile-development' });
@@ -241,11 +244,19 @@ export async function createBackend(options = {}) {
         res.end();
         return;
       }
+      const previewMatch=pathname.match(/^\/admin\/blogs\/preview\/([\w-]+)$/);
+      if(previewMatch){
+        requireRole(sessionFor(req),contentRoles);
+        renderer ||= await import('../server-dist/entry-server.js');
+        const content=JSON.parse(getContent().published),article=blogs.preview(previewMatch[1]);
+        res.setHeader('X-Robots-Tag','noindex,nofollow');res.setHeader('Content-Type','text/html; charset=utf-8');
+        res.end(method==='HEAD'?undefined:renderEditorial(article.path,origin,{header:renderer.renderHeader(article.path,content),content,articles:[article],preview:true}));return;
+      }
       let editorial = null;
-      if (editorialRoutes.includes(pathname)) {
+      if (pathname==='/blogs'||blogs.published().some(a=>a.path===pathname)) {
         renderer ||= await import('../server-dist/entry-server.js');
         const content = JSON.parse(getContent().published);
-        editorial = renderEditorial(pathname, origin, { header: renderer.renderHeader(pathname, content), content });
+        editorial = renderEditorial(pathname, origin, { header: renderer.renderHeader(pathname, content), content, articles:blogs.published() });
       }
       if(editorial){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(method==='HEAD'?undefined:editorial);return;}
       const dist = path.join(root, 'dist'), requested = path.resolve(dist, '.' + decodeURIComponent(pathname));
