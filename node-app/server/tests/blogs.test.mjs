@@ -20,6 +20,18 @@ test('blog lifecycle: permissions, private drafts, preview, publish isolation, s
   let r=await call('/api/admin/blogs');assert.equal(r.status,401);
   r=await call('/api/auth/setup','POST',{name:'Test owner',email:'test@example.com',password:'test-password-only'});assert.equal(r.status,201);cookie=r.response.headers.get('set-cookie').split(';')[0];csrf=r.data.csrf;
   r=await call('/api/admin/blogs');assert.equal(r.data.posts.length,2);
+  r=await call('/website-solutions');assert.ok(r.data.includes('"@type":"Service"'));assert.ok(r.data.includes('BreadcrumbList'));
+  assert.equal((await call('/items/L136522406//')).status,410);
+  assert.equal((await call('/items/not-a-retired-listing')).status,404);
+  const contentRow=backend.db.prepare('SELECT * FROM site_content WHERE id=1').get();
+  const hiddenHero=JSON.parse(contentRow.published);hiddenHero.homeLayout=[{id:'hero',visible:false}];
+  assert.ok((await call('/')).data.includes('consulting-hero-background'));
+  backend.db.prepare('UPDATE site_content SET draft=? WHERE id=1').run(JSON.stringify(hiddenHero));
+  assert.ok(!(await call('/?cms-preview=1')).data.includes('consulting-hero-background'));
+  assert.ok((await call('/')).data.includes('consulting-hero-background')); // A private preview must not poison public SSR cache.
+  backend.db.prepare('UPDATE site_content SET published=? WHERE id=1').run(JSON.stringify(hiddenHero));
+  assert.ok(!(await call('/')).data.includes('consulting-hero-background')); // Publishing must invalidate the cached markup.
+  backend.db.prepare('UPDATE site_content SET draft=?,published=? WHERE id=1').run(contentRow.draft,contentRow.published);
   const body={title:'Test <script>alert(1)</script>',slug:'test-private-blog',description:'A private draft description.',seoTitle:'Test SEO title',category:'Test',image:'',imageAlt:'',sections:[['Test heading','First paragraph.\n\nSecond paragraph.']]};
   assert.equal((await call('/api/admin/blogs','POST',body,true,'wrong')).status,403);
   r=await call('/api/admin/blogs','POST',body);assert.equal(r.status,201);let post=r.data.post;

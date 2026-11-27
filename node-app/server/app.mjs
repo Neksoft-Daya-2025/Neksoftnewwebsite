@@ -1,3 +1,4 @@
+import {pageStructuredData} from './seo.mjs';
 import {createBlogService} from './blog-service.mjs';
 import {editorialRoutes,renderEditorial} from './editorial.mjs';
 import {lighthouseService} from './lighthouse-service.mjs';
@@ -34,6 +35,7 @@ export async function createBackend(options = {}) {
   db.prepare('INSERT OR IGNORE INTO site_content(id,draft,published) VALUES(1,?,?)').run(JSON.stringify(seed), JSON.stringify(seed));
   await mkdir(path.join(directory, 'uploads'), { recursive: true, mode: 0o700 });
   let renderer;
+  const publishedRenderCache={payload:null,content:null,pages:new Map()};
   const getContent = () => db.prepare('SELECT * FROM site_content WHERE id=1').get();
   const audit = (user, action, entity, detail = '') => db.prepare('INSERT INTO audit VALUES(?,?,?,?,?,?)').run(randomUUID(), user?.id || null, action, entity, detail.slice(0, 400), now());
   const blogs=createBlogService(db,audit);
@@ -202,6 +204,7 @@ export async function createBackend(options = {}) {
         const bytes = await readFile(path.join(directory, 'uploads', path.basename(pathname))); res.setHeader('Content-Type', media.mime); res.setHeader('Cache-Control', 'public,max-age=31536000,immutable'); res.end(method === 'HEAD' ? undefined : bytes); return;
       }
       // Retired root-only URL patterns discovered in historical Search Console data.
+      if(/^\/items\/[A-Za-z]\d+\/{0,2}$/.test(pathname)){res.setHeader('X-Robots-Tag','noindex');return json(res,410,{error:'This legacy listing is no longer available.'});}
       if (pathname === '/') {
         const query = new URL(req.url, origin).searchParams;
         const retiredListing = query.getAll('l').some(value => /^[a-f0-9]{8,}\/*$/i.test(value));
@@ -271,11 +274,13 @@ export async function createBackend(options = {}) {
       else {
         renderer ||= await import('../server-dist/entry-server.js'); const contentRow = getContent();
         const preview = new URL(req.url, origin).searchParams.get('cms-preview') === '1' && sessionFor(req) && contentRoles.includes(sessionFor(req).role);
-        const content = JSON.parse(preview ? contentRow.draft : contentRow.published), page = content.pages[route];
+        if(!preview&&publishedRenderCache.payload!==contentRow.published){publishedRenderCache.payload=contentRow.published;publishedRenderCache.content=JSON.parse(contentRow.published);publishedRenderCache.pages.clear();}
+        const content=preview?JSON.parse(contentRow.draft):publishedRenderCache.content,page=content.pages[route];
         if (!page) res.statusCode = 404;
-        const markup = renderer.render(route, content);
+        let markup=!preview&&page?publishedRenderCache.pages.get(route):null;
+        if(!markup){markup=renderer.render(route,content);if(!preview&&page)publishedRenderCache.pages.set(route,markup);}
         html = html.replace('<div id="root"></div>', `<div id="root">${markup}</div><script type="application/json" id="neksoft-content">${scriptJson(content)}</script>`);
-        if (page) html = html.replace(/<title>.*?<\/title>/, `<title>${escape(page.title)} | NEKSOFT</title>`).replace(/<meta name="description"[^>]*\/>/, `<meta name="description" content="${escape(page.description)}"/>`).replace('</head>', `<link rel="canonical" href="${escape(origin + route)}"/><meta property="og:type" content="website"/><meta property="og:title" content="${escape(page.title)} | NEKSOFT"/><meta property="og:description" content="${escape(page.description)}"/><meta property="og:url" content="${escape(origin + route)}"/><meta property="og:image" content="${escape(origin+'/social.png')}"/><meta name="twitter:card" content="summary_large_image"/><script type="application/ld+json">${scriptJson({'@context':'https://schema.org','@type':'Organization',name:content.settings.companyName,url:origin,email:content.settings.contactEmail,telephone:content.settings.phone})}</script>${preview ? '<meta name="robots" content="noindex,nofollow"/>' : ''}</head>`);
+        if (page) html = html.replace(/<title>.*?<\/title>/, `<title>${escape(page.title)} | NEKSOFT</title>`).replace(/<meta name="description"[^>]*\/>/, `<meta name="description" content="${escape(page.description)}"/>`).replace('</head>', `<link rel="canonical" href="${escape(origin + route)}"/><meta property="og:type" content="website"/><meta property="og:title" content="${escape(page.title)} | NEKSOFT"/><meta property="og:description" content="${escape(page.description)}"/><meta property="og:url" content="${escape(origin + route)}"/><meta property="og:image" content="${escape(origin+'/social.png')}"/><meta name="twitter:card" content="summary_large_image"/><script type="application/ld+json">${scriptJson(pageStructuredData(route,page,content,origin))}</script>${preview ? '<meta name="robots" content="noindex,nofollow"/>' : ''}</head>`);
       }
       res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.setHeader('X-Frame-Options', 'SAMEORIGIN'); res.end(method === 'HEAD' ? undefined : html);
     } catch (error) {

@@ -1,0 +1,50 @@
+{
+  "/website-solutions": {
+    "title": "Website Design & Development",
+    "description": "Website design, development and redesign for businesses in the Netherlands and India. Discuss responsive pages, content and lead capture with NekSoft."
+  },
+  "/custom-software": {
+    "title": "Custom Software Development & API Integration",
+    "description": "Build custom software around your business processes. NekSoft develops operational systems, dashboards and integrations for teams in the Netherlands and India."
+  },
+  "/application-solutions": {
+    "title": "Business Web Application Development",
+    "description": "Plan and build business web applications, customer portals and operational dashboards. Discuss workflows, user roles and integrations with NekSoft."
+  },
+  "/saas-solutions": {
+    "title": "SaaS Product Development & MVP Planning",
+    "description": "Turn a software product idea into a scoped MVP. Discuss SaaS architecture, user workflows, integrations and ongoing development with NekSoft."
+  },
+  "/design-solutions": {
+    "title": "UI/UX & Website Design Services",
+    "description": "Create clear website and application experiences with NekSoft. Discuss user journeys, responsive interfaces, prototypes and design systems."
+  },
+  "/mobile-development": {
+    "title": "Mobile App Development Services",
+    "description": "Plan mobile applications for customers and field teams. Discuss app workflows, connected systems, platform choices and integrations with NekSoft."
+  },
+  "/iot-solutions": {
+    "title": "IoT Development & Remote Monitoring Solutions",
+    "description": "Connect equipment and sensors to useful operational dashboards. Discuss IoT integration, device connectivity and remote monitoring with NekSoft."
+  },
+  "/ai-automation": {
+    "title": "AI Workflow Automation & Business Integration",
+    "description": "Identify practical opportunities for AI and workflow automation. Discuss your business process, data, integrations and human review needs with NekSoft."
+  },
+  "/digital-marketing": {
+    "title": "SEO & Digital Marketing Services",
+    "description": "Plan search visibility, useful website content and measurable inquiries with NekSoft. Discuss your audience, service pages and digital marketing needs."
+  },
+  "/recruitment-skills": {
+    "title": "IT Recruitment & Skills Support",
+    "description": "Discuss IT role requirements, skills mapping and recruitment workflow support with NekSoft Consultancy Services."
+  },
+  "/projects": {
+    "title": "Projects & Client Websites",
+    "description": "Explore selected client website projects across commerce, education, hospitality and technology, with desktop and mobile previews."
+  },
+  "/contact": {
+    "title": "Contact NekSoft & Discuss Your Project",
+    "description": "Discuss website development, custom software, IoT or automation with NekSoft. Tell us about your goals, current systems and project requirements."
+  }
+}

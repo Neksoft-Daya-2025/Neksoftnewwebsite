@@ -5,6 +5,8 @@ export function setupPageScrollMotion(signal:AbortSignal){
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
  if(reduced.matches)return;
  const mobile=window.matchMedia('(max-width:700px)').matches;
+ // Keep the long homepage visible without measuring and animating every section on phones.
+ if(mobile&&window.location.pathname==='/')return;
  const root=document.getElementById('main-content');if(!root)return;
  const selector=['.reveal','.fisheries-layout>div','.person-card','.contact-form','.section-heading','.heading-row','.detail-intro>div','.capability-list>div','.deliverables-grid>div','.service-capabilities>div','.service-delivery-grid>div','.service-process-grid>article','.service-related-grid>a','.approved-capabilities>article','.approved-service-list>a','.approved-applications','.process-grid>article','.industry-card','.project-card','.portfolio-card','.depth-brief-card','.planning-decisions>div','.faq-item','.about-purpose-grid>article','.about-capability-line>div','.home-trust-bar .container>div'].join(',');
  const candidates=[...root.querySelectorAll<HTMLElement>(selector)].filter(el=>!el.closest('dialog,[hidden],[inert]')&&el.getBoundingClientRect().height>0);
